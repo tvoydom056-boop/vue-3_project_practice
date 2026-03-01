@@ -2,16 +2,13 @@
   <div class="products-page">
     <v-container>
       <v-row class="justify-center">
-        <v-col cols="12" md="12" lg="8">
-          <h1 class="text-h3 mb-6 text-center">Каталог Продуктов</h1>
-          <div class="text-body-1 mb-6 text-center">
-            Управление продуктами с поиском, фильтрацией и CRUD операциями.
-          </div>
+        <v-col cols="10" md="12" lg="8">
+          <h1 class="text-h3 text-center">Каталог Продуктов</h1>
         </v-col>
       </v-row>
 
       <v-row class="justify-center">
-        <v-col cols="12" md="12" lg="8">
+        <v-col cols="10" md="12" lg="8">
           <product-list
             :products="products"
             :loading="loading"
@@ -71,18 +68,6 @@ const mockProducts: Product[] = [
     brand: "Sony",
     category: "Аксессуары",
     thumbnail: "https://m.media-amazon.com/images/I/61vJ6OijDaL._AC_SL1500_.jpg",
-  },
-  {
-    id: 4,
-    title: "Игровая консоль PlayStation 5",
-    description: "Игровая приставка нового поколения",
-    price: 59990,
-    discountPercentage: 0,
-    rating: 4.8,
-    stock: 8,
-    brand: "Sony",
-    category: "Игры",
-    thumbnail: "https://gmedia.playstation.com/is/image/SIEPDC/ps5-product-thumbnail-01-en-14sep21",
   },
   {
     id: 5,
