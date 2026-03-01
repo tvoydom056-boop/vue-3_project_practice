@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
-import { ref } from 'vue'
-import { useTheme } from 'vuetify'
-import { useRoute } from 'vue-router'
+import { RouterView } from "vue-router";
+import { ref } from "vue";
+import { useTheme } from "vuetify";
+import { useRoute } from "vue-router";
 
-const drawer = ref(false)
-const theme = useTheme()
-const route = useRoute()
+const drawer = ref(false);
+const theme = useTheme();
+const route = useRoute();
 
 const toggleTheme = () => {
-  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
-}
+  theme.global.name.value = theme.global.current.value.dark ? "light" : "dark";
+};
 </script>
 
 <template>
@@ -37,16 +37,6 @@ const toggleTheme = () => {
       <template #append>
         <div class="d-none d-md-flex align-center gap-3">
           <v-btn
-            to="/"
-            variant="text"
-            class="text-on-surface font-weight-medium"
-            :class="{ 'text-primary': route.path === '/' }"
-          >
-            <v-icon start icon="mdi-home" />
-            Главная
-          </v-btn>
-
-          <v-btn
             to="/products"
             variant="text"
             class="text-on-surface font-weight-medium"
@@ -56,19 +46,13 @@ const toggleTheme = () => {
             Продукты
           </v-btn>
 
-          <v-btn
-            icon="mdi-theme-light-dark"
-            variant="text"
-            @click="toggleTheme"
-            class="ml-2"
-          />
+          <v-btn icon="mdi-theme-light-dark" variant="text" @click="toggleTheme" class="ml-2" />
         </div>
       </template>
     </v-app-bar>
 
     <v-navigation-drawer v-model="drawer" temporary>
       <v-list>
-        <v-list-item to="/" prepend-icon="mdi-home" title="Главная" />
         <v-list-item to="/users" prepend-icon="mdi-account-group" title="Пользователи" />
         <v-list-item to="/products" prepend-icon="mdi-package-variant" title="Продукты" />
       </v-list>

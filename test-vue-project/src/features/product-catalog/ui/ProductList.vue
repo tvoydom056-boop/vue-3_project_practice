@@ -84,20 +84,7 @@
               density="comfortable"
               @keyup.enter="applyPriceFilter"
             >
-              <template #append>
-                <span class="text-caption">₽</span>
-              </template>
             </v-text-field>
-
-            <v-btn
-              icon="mdi-filter"
-              variant="outlined"
-              size="small"
-              @click="applyPriceFilter"
-              :disabled="!hasPriceFilter"
-              title="Применить фильтр по цене"
-            />
-
             <v-btn
               v-if="hasPriceFilter"
               icon="mdi-close"
