@@ -2,7 +2,7 @@
   <div class="products-page">
     <v-container>
       <v-row class="justify-center">
-        <v-col cols="12" md="10" lg="8">
+        <v-col cols="12" md="12" lg="8">
           <h1 class="text-h3 mb-6 text-center">Каталог Продуктов</h1>
           <div class="text-body-1 mb-6 text-center">
             Управление продуктами с поиском, фильтрацией и CRUD операциями.
@@ -11,7 +11,7 @@
       </v-row>
 
       <v-row class="justify-center">
-        <v-col cols="12" md="10" lg="8">
+        <v-col cols="12" md="12" lg="8">
           <product-list
             :products="products"
             :loading="loading"
@@ -297,6 +297,15 @@ const deleteProduct = (product: Product) => {
 
 <style scoped>
 .products-page {
-  padding: 24px 0;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+:deep(.v-container) {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  max-width: 100% !important;
 }
 </style>
