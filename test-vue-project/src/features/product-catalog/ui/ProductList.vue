@@ -42,18 +42,6 @@
             density="comfortable"
           />
 
-          <v-chip-group v-model="selectedBrand" multiple class="flex-wrap">
-            <v-chip
-              v-for="brand in brands"
-              :key="brand"
-              :value="brand"
-              variant="outlined"
-              size="small"
-            >
-              {{ brand }}
-            </v-chip>
-          </v-chip-group>
-
           <div class="d-flex gap-2 align-center" style="min-width: 300px">
             <v-text-field
               v-model="minPrice"
@@ -176,36 +164,6 @@
           </div>
         </template>
 
-        <!-- eslint-disable-next-line vue/valid-v-slot -->
-        <template #item.actions="{ item }">
-          <div class="d-flex gap-2">
-            <v-btn
-              icon="mdi-eye-outline"
-              size="small"
-              variant="tonal"
-              color="info"
-              @click="emit('view', item)"
-              rounded="lg"
-            />
-            <v-btn
-              icon="mdi-pencil-outline"
-              size="small"
-              variant="tonal"
-              color="primary"
-              @click="emit('edit', item)"
-              rounded="lg"
-            />
-            <v-btn
-              icon="mdi-delete-outline"
-              size="small"
-              variant="tonal"
-              color="error"
-              @click="emit('delete', item)"
-              rounded="lg"
-            />
-          </div>
-        </template>
-
         <template #no-data>
           <div class="text-center py-12">
             <v-icon size="64" color="grey-lighten-1" class="mb-4"> mdi-magnify-close </v-icon>
@@ -298,16 +256,11 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
 });
 
-const emit = defineEmits<{
-  create: [];
-  view: [product: Product];
-  edit: [product: Product];
-  delete: [product: Product];
-}>();
+
 
 const search = ref("");
 const selectedCategory = ref("все");
-const selectedBrand = ref<string[]>([]);
+
 const minPrice = ref<number | null>(null);
 const maxPrice = ref<number | null>(null);
 const itemsPerPage = ref(5);
@@ -324,7 +277,6 @@ const headers = [
   { title: "Остаток", key: "stock", sortable: true, width: "180px" },
   { title: "Рейтинг", key: "rating", sortable: true, width: "150px" },
   { title: "Бренд", key: "brand", sortable: true, width: "120px" },
-  { title: "Действия", key: "actions", sortable: false, align: "center" as const, width: "150px" },
 ];
 
 const categories = computed(() => {
@@ -336,10 +288,7 @@ const categories = computed(() => {
   }));
 });
 
-const brands = computed(() => {
-  const uniqueBrands = Array.from(new Set(props.products.map((p) => p.brand).filter(Boolean)));
-  return uniqueBrands;
-});
+
 
 // Пагинация
 const currentPage = ref(1);
@@ -408,11 +357,7 @@ const filteredProducts = computed(() => {
     filtered = filtered.filter((product) => product.category === selectedCategory.value);
   }
 
-  if (selectedBrand.value.length > 0) {
-    filtered = filtered.filter(
-      (product) => product.brand && selectedBrand.value.includes(product.brand)
-    );
-  }
+
 
   // Фильтр по цене
   if (minPrice.value !== null && minPrice.value > 0) {
@@ -464,7 +409,7 @@ const clearPriceFilter = () => {
 const resetFilters = () => {
   search.value = "";
   selectedCategory.value = "все";
-  selectedBrand.value = [];
+
   minPrice.value = null;
   maxPrice.value = null;
   currentPage.value = 1;
@@ -473,7 +418,7 @@ const resetFilters = () => {
 // Сброс на первую страницу при изменении фильтров
 import { watch } from "vue";
 
-watch([search, selectedCategory, selectedBrand, itemsPerPage, minPrice, maxPrice], () => {
+watch([search, selectedCategory, itemsPerPage, minPrice, maxPrice], () => {
   currentPage.value = 1;
 });
 
