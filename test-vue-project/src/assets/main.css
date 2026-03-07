@@ -110,3 +110,25 @@ a:hover {
 :focus:not(:focus-visible) {
   outline: none;
 }
+
+/* Плавные переходы для темы */
+.v-application {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.v-card,
+.v-sheet,
+.v-app-bar,
+.v-navigation-drawer,
+.v-main {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Стили для кнопки темы */
+.theme-toggle-btn {
+  transition: transform 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.1);
+}

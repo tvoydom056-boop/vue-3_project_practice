@@ -8,6 +8,24 @@ import * as directives from 'vuetify/directives'
 // Import MDI icons
 import '@mdi/font/css/materialdesignicons.css'
 
+// Функция для определения начальной темы
+const getInitialTheme = (): string => {
+  if (typeof window !== 'undefined') {
+    // Проверяем сохранённую тему
+    const savedTheme = localStorage.getItem('vue-test-theme');
+    if (savedTheme) {
+      return savedTheme;
+    }
+
+    // Проверяем системные предпочтения
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+  }
+
+  return 'light';
+};
+
 export const vuetify = createVuetify({
   components,
   directives,
@@ -19,7 +37,7 @@ export const vuetify = createVuetify({
     },
   },
   theme: {
-    defaultTheme: 'light',
+    defaultTheme: getInitialTheme(),
     themes: {
       light: {
         colors: {
