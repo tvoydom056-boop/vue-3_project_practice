@@ -1,101 +1,185 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { User } from '@/entities/user'
+import { useUsersQuery, useUserQuery, useCreateUserMutation, useUpdateUserMutation, useDeleteUserMutation } from './useUserQueries'
 
 export const useUserStore = defineStore('user', () => {
-  // State
-  const users = ref<User[]>([])
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+  // UI State (хранится в Pinia)
+  const selectedUserId = ref<number | null>(null)
+  const searchQuery = ref('')
+  const currentPage = ref(1)
+  const itemsPerPage = ref(10)
+  const sortBy = ref('name')
+  const sortDirection = ref<'asc' | 'desc'>('asc')
 
-  // Getters
+  // Композабельные функции Vue Query
+  const usersQuery = useUsersQuery({ search: searchQuery.value })
+  const selectedUserQuery = useUserQuery(selectedUserId.value!)
+  const createUserMutation = useCreateUserMutation()
+  const updateUserMutation = useUpdateUserMutation()
+  const deleteUserMutation = useDeleteUserMutation()
+
+  // Геттеры для UI
+  const selectedUser = computed(() => {
+    if (!selectedUserId.value) return null
+    return selectedUserQuery.data.value
+  })
+
+  const hasSelection = computed(() => selectedUserId.value !== null)
+
+  // Геттеры, объединяющие данные
+  const users = computed(() => {
+    const data = usersQuery.data.value || []
+
+    // Сортировка на клиенте (временное решение)
+    if (sortBy.value && sortDirection.value) {
+      return [...data].sort((a, b) => {
+        const aValue = a[sortBy.value as keyof User]
+        const bValue = b[sortBy.value as keyof User]
+
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          return sortDirection.value === 'asc'
+            ? aValue.localeCompare(bValue)
+            : bValue.localeCompare(aValue)
+        }
+
+        return 0
+      })
+    }
+
+    return data
+  })
+
+  const loading = computed(() => usersQuery.isLoading.value || selectedUserQuery.isLoading.value)
+  const error = computed(() => usersQuery.error.value ? usersQuery.error.value.message : null)
   const userCount = computed(() => users.value.length)
 
-  // Actions
-  const fetchUsers = async () => {
-    loading.value = true
-    error.value = null
-    try {
-      // TODO: Implement actual API call
-      await new Promise(resolve => setTimeout(resolve, 500))
-      users.value = []
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to fetch users'
-    } finally {
-      loading.value = false
+  // Пагинация
+  const paginatedUsers = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage.value
+    const end = start + itemsPerPage.value
+    return users.value.slice(start, end)
+  })
+
+  const totalPages = computed(() => Math.ceil(userCount.value / itemsPerPage.value))
+
+  // Действия для UI
+  const selectUser = (userId: number) => {
+    selectedUserId.value = userId
+  }
+
+  const clearSelection = () => {
+    selectedUserId.value = null
+  }
+
+  const setSearchQuery = (query: string) => {
+    searchQuery.value = query
+    // Обновляем запрос с новым поисковым запросом
+    usersQuery.refetch()
+  }
+
+  const setSort = (field: string, direction: 'asc' | 'desc') => {
+    sortBy.value = field
+    sortDirection.value = direction
+  }
+
+  const setPagination = (page: number, perPage: number) => {
+    currentPage.value = page
+    itemsPerPage.value = perPage
+  }
+
+  const goToNextPage = () => {
+    if (currentPage.value < totalPages.value) {
+      currentPage.value++
+    }
+  }
+
+  const goToPrevPage = () => {
+    if (currentPage.value > 1) {
+      currentPage.value--
+    }
+  }
+
+  // Действия для данных (делегируют к Vue Query)
+  const fetchUsers = () => {
+    usersQuery.refetch()
+  }
+
+  const refetchSelectedUser = () => {
+    if (selectedUserId.value) {
+      selectedUserQuery.refetch()
     }
   }
 
   const createUser = async (userData: Omit<User, 'id'>) => {
-    loading.value = true
-    try {
-      // TODO: Implement actual API call
-      await new Promise(resolve => setTimeout(resolve, 500))
-      const newUser: User = {
-        id: Date.now(),
-        name: userData.name,
-        email: userData.email,
-        username: userData.username,
-        phone: userData.phone || undefined
-      }
-      users.value.push(newUser)
-      return newUser
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to create user'
-      throw err
-    } finally {
-      loading.value = false
-    }
+    return createUserMutation.mutateAsync(userData)
   }
 
   const updateUser = async (id: number, userData: Partial<User>) => {
-    loading.value = true
-    try {
-      // TODO: Implement actual API call
-      await new Promise(resolve => setTimeout(resolve, 500))
-      const index = users.value.findIndex(user => user.id === id)
-      if (index !== -1) {
-        const updatedUser = { ...users.value[index], ...userData }
-        // Ensure required fields are present
-        if (updatedUser.id && updatedUser.name && updatedUser.email && updatedUser.username) {
-          users.value[index] = updatedUser as User
-        }
-      }
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to update user'
-      throw err
-    } finally {
-      loading.value = false
-    }
+    return updateUserMutation.mutateAsync({ id, data: userData })
   }
 
   const deleteUser = async (id: number) => {
-    loading.value = true
-    try {
-      // TODO: Implement actual API call
-      await new Promise(resolve => setTimeout(resolve, 500))
-      users.value = users.value.filter(user => user.id !== id)
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to delete user'
-      throw err
-    } finally {
-      loading.value = false
-    }
+    return deleteUserMutation.mutateAsync(id)
   }
 
+  // Вспомогательные геттеры
+  const isCreating = computed(() => createUserMutation.isPending.value)
+  const isUpdating = computed(() => updateUserMutation.isPending.value)
+  const isDeleting = computed(() => deleteUserMutation.isPending.value)
+
+  const createError = computed(() => createUserMutation.error.value?.message)
+  const updateError = computed(() => updateUserMutation.error.value?.message)
+  const deleteError = computed(() => deleteUserMutation.error.value?.message)
+
   return {
-    // State
-    users,
+    // UI State
+    selectedUserId,
+    searchQuery,
+    currentPage,
+    itemsPerPage,
+    sortBy,
+    sortDirection,
+
+    // Геттеры
+    selectedUser,
+    hasSelection,
+    users: paginatedUsers,
+    allUsers: users,
     loading,
     error,
-
-    // Getters
     userCount,
+    totalPages,
 
-    // Actions
+    // UI Actions
+    selectUser,
+    clearSelection,
+    setSearchQuery,
+    setSort,
+    setPagination,
+    goToNextPage,
+    goToPrevPage,
+
+    // Data Actions
     fetchUsers,
+    refetchSelectedUser,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+
+    // Mutation статусы
+    isCreating,
+    isUpdating,
+    isDeleting,
+    createError,
+    updateError,
+    deleteError,
+
+    // Vue Query объекты (для доступа к дополнительным методам)
+    usersQuery,
+    selectedUserQuery,
+    createUserMutation,
+    updateUserMutation,
+    deleteUserMutation,
   }
 })

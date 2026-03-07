@@ -10,7 +10,9 @@
     "test:unit": "vitest",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
-    "lint": "eslint . --fix --cache"
+    "lint": "eslint . --fix --cache",
+    "format": "prettier --write \"src/**/*.{ts,vue,js,json}\"",
+    "lint:fix": "npm run lint && npm run format"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
